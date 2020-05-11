@@ -98,6 +98,12 @@ comfast,cf-wr752ac-v1|\
 engenius,ecb1750)
 	ucidef_set_led_netdev "lan" "LAN" "$boardname:blue:lan" "eth0"
 	;;
+engenius,ens202ext)
+	ucidef_set_rssimon "wlan0" "200000" "1"
+	ucidef_set_led_rssi "rssilow" "RSSILOW" "$boardname:red:rssi1" "wlan0" "1"  "100"
+	ucidef_set_led_rssi "rssimedium" "RSSIMEDIUM" "$boardname:amber:rssi2" "wlan0" "33" "100"
+	ucidef_set_led_rssi "rssihigh" "RSSIHIGH" "$boardname:green:rssi3" "wlan0" "75" "100"
+	;;
 devolo,magic-2-wifi)
 	ucidef_set_led_netdev "plcw" "dLAN" "devolo:white:dlan" "eth0.1" "rx"
 	;;
