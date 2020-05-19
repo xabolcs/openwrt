@@ -608,8 +608,9 @@ endef
 TARGET_DEVICES += engenius_ecb1750
 
 define Device/engenius_ens202ext
-  ATH_SOC := ar9341
-  DEVICE_TITLE := Engenius ENS202EXT
+  SOC := ar9341
+  DEVICE_VENDOR := EnGenius
+  DEVICE_MODEL := ENS202EXT
   DEVICE_PACKAGES := rssileds kmod-leds-gpio
   IMAGE_SIZE := 13632k
   SUPPORTED_DEVICES += ens202ext
