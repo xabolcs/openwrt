@@ -60,6 +60,24 @@
 			gpios = <&gpio 0 GPIO_ACTIVE_LOW>;
 		};
 	};
+
+	virtual_flash {
+		compatible = "mtd-concat";
+		devices = <&fwpartrootfs &fwpartkernel>;
+
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			partition@0 {
+				reg = <0x0 0x0>;
+				label = "firmware";
+				compatible = "openwrt,okli";
+			};
+		};
+	};
+
 };
 
 &ref {
@@ -102,9 +120,18 @@
 			};
 
 			partition@a0000 {
-				compatible = "denx,uimage";
-				label = "firmware";
-				reg = <0x0a0000 0xd50000>;
+				label = "loader";
+				reg = <0x0a0000 0x010000>;
+			};
+
+			fwpartkernel: partition@b0000 {
+				label = "fwpart-old-kernel";
+				reg = <0x0b0000 0x017000>;
+			};
+
+			fwpartrootfs: partition@220000 {
+				label = "fwpart-old-rootfs";
+				reg = <0x220000 0xbd0000>;
 			};
 
 			partition@df0000 {

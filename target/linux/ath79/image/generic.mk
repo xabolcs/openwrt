@@ -88,6 +88,18 @@ define Build/teltonika-fw-fake-checksum
 		dd of=$@ bs=1 count=16 seek=$$offs conv=notrunc
 endef
 
+define Build/engenius_ens202ext-factory
+  -[ -f "$@" ] && \
+  mkdir -p "$@.senao" && \
+  touch $@.senao/FWINFO-OpenWrt-$(REVISION)-ens202ext && \
+  cp "$(KDIR)/loader-$(word 1,$(1)).uImage" "$@.senao/openwrt-senao-ens202ext-uImage-lzma.bin" && \
+  mv "$@" "$@.senao/openwrt-senao-ens202ext-root.squashfs" && \
+  $(TAR) -cp --numeric-owner --owner=0 --group=0 --mode=a-s --sort=name \
+    $(if $(SOURCE_DATE_EPOCH),--mtime="@$(SOURCE_DATE_EPOCH)") \
+    -C "$@.senao" . | gzip -9n > "$@" && \
+  rm -rf "$@.senao"
+endef
+
 define Device/seama
   KERNEL := kernel-bin | append-dtb | relocate-kernel | lzma
   KERNEL_INITRAMFS := $$(KERNEL) | seama
@@ -613,6 +625,15 @@ define Device/engenius_ens202ext
   DEVICE_MODEL := ENS202EXT
   DEVICE_PACKAGES := rssileds kmod-leds-gpio
   IMAGE_SIZE := 13632k
+  LOADER_TYPE := bin
+  LOADER_FLASH_OFFS := 0x220000
+  COMPILE := loader-$(1).bin loader-$(1).uImage
+  COMPILE/loader-$(1).bin := loader-okli-compile
+  COMPILE/loader-$(1).uImage := append-loader-okli $(1) | pad-to 64k | lzma | \
+	uImage lzma
+  KERNEL := kernel-bin | append-dtb | lzma | uImage lzma -M 0x4f4b4c49
+  IMAGES += factory.bin
+  IMAGE/factory.bin := $$(IMAGE/sysupgrade.bin) | engenius_ens202ext-factory $(1)
   SUPPORTED_DEVICES += ens202ext
 endef
 TARGET_DEVICES += engenius_ens202ext
