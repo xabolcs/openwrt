@@ -12,6 +12,8 @@
 		led-failsafe = &led_wlan;
 		led-running = &led_wlan;
 		led-upgrade = &led_wlan;
+
+		label-mac-device = &wmac;
 	};
 
 	leds {
@@ -57,7 +59,8 @@
 	flash@0 {
 		compatible = "jedec,spi-nor";
 		reg = <0>;
-		spi-max-frequency = <10000000>;
+		spi-max-frequency = <50000000>;
+		m25p,fast-read;
 
 		partitions {
 			compatible = "fixed-partitions";
@@ -71,7 +74,7 @@
 			};
 
 			partition@30000 {
-				label = "u-boot-env";
+				label = "config";
 				reg = <0x30000 0x10000>;
 				read-only;
 			};
@@ -83,9 +86,24 @@
 			};
 
 			partition@50000 {
-				compatible = "denx,uimage";
-				label = "firmware";
-				reg = <0x50000 0x7b0000>;
+				label = "kernel";
+				reg = <0x50000 0x180000>;
+				read-only;
+			};
+
+			partition@1d0000 {
+				label = "u-boot-env";
+				reg = <0x1d0000 0x10000>;
+			};
+
+			firmware3: partition@1e0000 {
+				label = "firmware3";
+				reg = <0x1e0000 0x20000>;
+			};
+
+			firmware1: partition@200000 {
+				label = "rootfs";
+				reg = <0x200000 0x600000>;
 			};
 		};
 	};
