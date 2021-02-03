@@ -1195,6 +1195,7 @@ endef
 TARGET_DEVICES += zyxel_keenetic
 
 define Device/zyxel_keenetic-lite-b
+  $(Device/uimage-lzma-loader)
   SOC := rt5350
   IMAGE_SIZE := 7872k
   DEVICE_VENDOR := ZyXEL
