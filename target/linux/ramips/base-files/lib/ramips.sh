@@ -238,6 +238,9 @@ ramips_board_detect() {
 	*"HPM")
 		name="hpm"
 		;;
+	*"HT-TM01")
+		name="ht-tm01"
+		;;
 	*"HT-TM02")
 		name="ht-tm02"
 		;;

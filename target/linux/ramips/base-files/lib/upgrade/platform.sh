@@ -34,7 +34,8 @@ platform_find_part() {
 
 platform_check_image() {
 	case "$(board_name)" in
-	ht-tm02)
+	hootoo,ht-tm01|\
+	hootoo,ht-tm02)
 		local partitions=$(platform_find_partitions)
 		local params=$(platform_find_part "$partitions" params)
 
@@ -123,8 +124,10 @@ platform_do_upgrade() {
 	xiaomi,mir3p)
 		nand_do_upgrade "$1"
 		;;
-	ht-tm02)
+	hootoo,ht-tm01|\
+	hootoo,ht-tm02)
 		hootoo_do_upgrade "$1"
+		;;
 	tplink,c50-v4)
 		MTD_ARGS="-t romfile"
 		default_do_upgrade "$1"

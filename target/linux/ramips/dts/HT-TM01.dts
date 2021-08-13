@@ -1,0 +1,40 @@
+#include "rt5350_sunvalley_tripmate.dtsi"
+
+/ {
+	compatible = "hootoo,ht-tm01", "ralink,rt5350-soc";
+	model = "HooToo HT-TM01";
+
+	aliases {
+		led-boot = &led_wlan;
+		led-failsafe = &led_wlan;
+		led-running = &led_wlan;
+		led-upgrade = &led_wlan;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		led_wlan: wlan {
+			label = "ht-tm01:blue:wlan";
+			gpios = <&gpio0 7 GPIO_ACTIVE_LOW>;
+		};
+
+		lan {
+			label = "ht-tm01:green:lan";
+			gpios = <&gpio0 12 GPIO_ACTIVE_LOW>;
+		};
+	};
+};
+
+&gpio0 {
+	status = "okay";
+};
+
+&i2c {
+	status = "okay";
+};
+
+&sunvalley_gpio {
+	ralink,group = "jtag", "uartf";
+	ralink,function = "gpio";
+};
