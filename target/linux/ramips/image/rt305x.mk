@@ -382,6 +382,12 @@ define Device/ht-tm02
   DTS := HT-TM02
   DEVICE_TITLE := HooToo HT-TM02
   DEVICE_PACKAGES := kmod-usb-core kmod-usb-ohci kmod-usb2 kmod-usb-ledtrig-usbport
+  IMAGE_SIZE := 6144k
+  KERNEL_SIZE := 1536k
+  IMAGES += kernel.bin rootfs.bin
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+  IMAGE/kernel.bin := append-kernel | check-size $$$$(KERNEL_SIZE)
+  IMAGE/rootfs.bin := append-rootfs | pad-rootfs | check-size $$$$(IMAGE_SIZE)
 endef
 TARGET_DEVICES += ht-tm02
 
