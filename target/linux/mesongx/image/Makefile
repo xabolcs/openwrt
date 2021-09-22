@@ -28,7 +28,7 @@ endef
 define Build/sdcard-img
 	$(INSTALL_DIR) $(KDIR)/boot.ext4
 	$(CP) $(KDIR)/boot.$1.scr $(KDIR)/boot.ext4/boot.scr
-	$(CP) $(KDIR_KERNEL_IMAGE) $(KDIR)/boot.ext4/uImage
+	$(CP) $(IMAGE_KERNEL) $(KDIR)/boot.ext4/uImage
 	$(foreach dts,$(DEVICE_DTS),$(CP) $(DTS_DIR)/$(dts).dtb $(KDIR)/boot.ext4/)
 	PADDING="$(CONFIG_TARGET_IMAGES_PAD)" \
 	PATH="$(TARGET_PATH)" \
