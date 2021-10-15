@@ -25,6 +25,54 @@ define Build/bootloader-odroid-c2
 	dd if=$(STAGING_DIR_IMAGE)/odroidc2/u-boot.gxbb of=$@ conv=fsync,notrunc bs=512 seek=97
 endef
 
+# FIX ME: use gxlimg (https://github.com/repk/gxlimg), or meson-tools, or meson64-tools (https://github.com/angerman/meson64-tools)
+# or at least use the aml_encrypt_g12b binary
+define Build/bootloader-odroid-n2
+	$(STAGING_DIR_IMAGE)/blx_fix.sh \
+		$(STAGING_DIR_IMAGE)/odroidn2/bl30.bin \
+		$(STAGING_DIR_IMAGE)/odroidn2/zero_tmp \
+		$(STAGING_DIR_IMAGE)/odroidn2/bl30_zero.bin \
+		\
+		$(STAGING_DIR_IMAGE)/odroidn2/bl301.bin \
+		$(STAGING_DIR_IMAGE)/odroidn2/bl301_zero.bin \
+		$(STAGING_DIR_IMAGE)/odroidn2/bl30_new.bin \
+		\
+		bl30
+
+	$(STAGING_DIR_IMAGE)/blx_fix.sh \
+		$(STAGING_DIR_IMAGE)/odroidn2/bl2.bin \
+		$(STAGING_DIR_IMAGE)/odroidn2/zero_tmp \
+		$(STAGING_DIR_IMAGE)/odroidn2/bl2_zero.bin \
+		\
+		$(STAGING_DIR_IMAGE)/odroidn2/acs.bin \
+		$(STAGING_DIR_IMAGE)/odroidn2/bl21_zero.bin \
+		$(STAGING_DIR_IMAGE)/odroidn2/bl2_new.bin \
+		\
+		bl2
+
+	$(STAGING_DIR_IMAGE)/aml_encrypt_g12b --bl30sig --input $(STAGING_DIR_IMAGE)/odroidn2/bl30_new.bin          --output $(STAGING_DIR_IMAGE)/odroidn2/bl30_new.bin.g12a.enc --level v3
+	$(STAGING_DIR_IMAGE)/aml_encrypt_g12b --bl3sig  --input $(STAGING_DIR_IMAGE)/odroidn2/bl30_new.bin.g12a.enc --output $(STAGING_DIR_IMAGE)/odroidn2/bl30_new.bin.enc      --level v3 --type bl30
+	$(STAGING_DIR_IMAGE)/aml_encrypt_g12b --bl3sig  --input $(STAGING_DIR_IMAGE)/bl31_g12a.bin                  --output $(STAGING_DIR_IMAGE)/odroidn2/bl31.img.enc          --level v3 --type bl31
+	$(STAGING_DIR_IMAGE)/aml_encrypt_g12b --bl3sig  --input $(BIN_DIR)/u-boot-odroid-n2/u-boot.bin              --output $(STAGING_DIR_IMAGE)/odroidn2/bl33.bin.enc          --level v3 --type bl33
+	$(STAGING_DIR_IMAGE)/aml_encrypt_g12b --bl2sig  --input $(STAGING_DIR_IMAGE)/odroidn2/bl2_new.bin           --output $(STAGING_DIR_IMAGE)/odroidn2/bl2.n.bin.sig
+	$(STAGING_DIR_IMAGE)/aml_encrypt_g12b --bootmk                                                              --output $(STAGING_DIR_IMAGE)/odroidn2/u-boot.bin            --level v3 \
+			--bl2 $(STAGING_DIR_IMAGE)/odroidn2/bl2.n.bin.sig \
+			--bl30 $(STAGING_DIR_IMAGE)/odroidn2/bl30_new.bin.enc \
+			--bl31 $(STAGING_DIR_IMAGE)/odroidn2/bl31.img.enc \
+			--bl33 $(STAGING_DIR_IMAGE)/odroidn2/bl33.bin.enc \
+			\
+			--ddrfw1 $(STAGING_DIR_IMAGE)/odroidn2/ddr4_1d.fw \
+			--ddrfw2 $(STAGING_DIR_IMAGE)/odroidn2/ddr4_2d.fw \
+			--ddrfw3 $(STAGING_DIR_IMAGE)/odroidn2/ddr3_1d.fw \
+			--ddrfw4 $(STAGING_DIR_IMAGE)/odroidn2/piei.fw \
+			--ddrfw5 $(STAGING_DIR_IMAGE)/odroidn2/lpddr4_1d.fw \
+			--ddrfw6 $(STAGING_DIR_IMAGE)/odroidn2/lpddr4_2d.fw \
+			--ddrfw7 $(STAGING_DIR_IMAGE)/odroidn2/diag_lpddr4.fw \
+			--ddrfw8 $(STAGING_DIR_IMAGE)/odroidn2/aml_ddr.fw
+	
+	dd if=$(STAGING_DIR_IMAGE)/odroidn2/u-boot.bin of=$@ conv=fsync,notrunc bs=512 seek=1
+endef
+
 define Build/sdcard-img
 	$(INSTALL_DIR) $(KDIR)/boot.ext4
 	$(CP) $(KDIR)/boot.$1.scr $(KDIR)/boot.ext4/boot.scr
@@ -41,7 +89,11 @@ endef
 
 define Build/uImage-meson
 	$(call Build/uImage,none)
-	mkimage -A arm64 -T script -C none -n "boot.scr uImage" -d boot.$1.txt $(KDIR)/boot.$1.scr
+	sed \
+		-e 's#@ROOT@#$(IMG_PART_SIGNATURE)#g' \
+		-e 's#@DTB@#$(firstword $(DEVICE_DTS))#g' \
+		boot.$1.txt > $@-new.bootscript
+	mkimage -A arm64 -T script -C none -n "boot.scr uImage" -d $@-new.bootscript $(KDIR)/boot.$1.scr
 endef
 
 ### Devices ###
@@ -63,5 +115,14 @@ define Device/odroid-c2
   SUPPORTED_DEVICES += hardkernel,odroid-c2
 endef
 TARGET_DEVICES += odroid-c2
+
+define Device/odroid-n2
+  DEVICE_DTS := amlogic/meson-g12b-odroid-n2
+  DEVICE_PACKAGES += amlogic-boot-fip u-boot-odroid-n2 kmod-rtc-pcf8563 kmod-usb-storage-uas kmod-usb-net-rtl8152
+  DEVICE_TITLE := ODROID N2
+  KERNEL := kernel-bin | uImage-meson $$(DEVICE_NAME)
+  SUPPORTED_DEVICES += hardkernel,odroid-n2
+endef
+TARGET_DEVICES += odroid-n2
 
 $(eval $(call BuildImage))

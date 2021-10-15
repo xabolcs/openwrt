@@ -8,7 +8,7 @@ ARCH:=aarch64
 BOARD:=mesongx
 BOARDNAME:=Amlogic S9 family
 CPU_TYPE:=cortex-a53
-DEVICE_TYPE:=other
+#DEVICE_TYPE:=other
 FEATURES:=audio boot-part ext4 fpu legacy-sdcard squashfs usbgadget
 MAINTAINER:=Stijn Tintel <stijn@linux-ipv6.be>
 
@@ -22,7 +22,9 @@ include $(INCLUDE_DIR)/target.mk
 
 DEFAULT_PACKAGES += \
 	e2fsprogs \
+	f2fsck \
 	kmod-sound-core \
+	kmod-usb2 kmod-usb3 \
 	kmod-usb-hid \
 	mkf2fs \
 	partx-utils

@@ -1,0 +1,41 @@
+From 8e0ccfff3f192ce315add597612717cf23d11e47 Mon Sep 17 00:00:00 2001
+From: Hubai Szabolcs <hubai@astron.hu>
+Date: Wed, 15 Sep 2021 00:44:54 +0200
+Subject: [PATCH 4/4] Fix "initializer element is not a constant expression"
+ error for odroidn2
+
+as it was for odroidc4
+
+Signed-off-by: Szabolcs Hubai <szab.hu@gmail.com>
+---
+ arch/arm/include/asm/arch-g12b/ddr_define.h | 2 +-
+ board/hardkernel/odroidn2/firmware/timing.c | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/include/asm/arch-g12b/ddr_define.h b/arch/arm/include/asm/arch-g12b/ddr_define.h
+index 3e8a6f0ef0..da38df63c4 100644
+--- a/arch/arm/include/asm/arch-g12b/ddr_define.h
++++ b/arch/arm/include/asm/arch-g12b/ddr_define.h
+@@ -275,7 +275,7 @@
+ 											DDR_FUNC_LPDDR3_CA_TRAINING_CA1_BIT0| \
+ 											DDR_FUNC_LPDDR3_CA_TRAINING_CA1_BIT1| \
+ 											DDR_FUNC_LPDDR3_SOC_ODT_ONLY_UP	| \
+-											(1 << 31) 						\
++											(1U << 31) 						\
+ 											)
+ 
+ 
+diff --git a/board/hardkernel/odroidn2/firmware/timing.c b/board/hardkernel/odroidn2/firmware/timing.c
+index 6801380ba7..0517e2f236 100644
+--- a/board/hardkernel/odroidn2/firmware/timing.c
++++ b/board/hardkernel/odroidn2/firmware/timing.c
+@@ -345,5 +345,5 @@ bl2_reg_t __bl2_reg[] = {
+ 	{AO_GPIO_O,         (1 << 4),                (1 << 4),   0, BL2_INIT_STAGE_1, 0},
+ 	/* Enable VCCK */
+ 	{AO_SEC_REG0,         (1 << 0),                (1 << 0),     0, BL2_INIT_STAGE_1, 0},
+-	{AO_GPIO_O,           (1 << 31),               (1 << 31),    0, BL2_INIT_STAGE_1, 0},
++	{AO_GPIO_O,           (1U << 31),               (1U << 31),    0, BL2_INIT_STAGE_1, 0},
+ };
+-- 
+2.25.1
+

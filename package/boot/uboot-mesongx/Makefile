@@ -32,6 +32,7 @@ define U-Boot/odroid-n2
 endef
 
 UBOOT_TARGETS:= \
-	odroid-c2
+	odroid-c2 \
+	odroid-n2
 
 $(eval $(call BuildPackage/U-Boot))

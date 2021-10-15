@@ -1,0 +1,45 @@
+From 913a6a0ecae9806ef74d8218179bda2136af951c Mon Sep 17 00:00:00 2001
+From: "Matwey V. Kornilov" <matwey.kornilov@gmail.com>
+Date: Fri, 19 Mar 2021 20:01:42 +0300
+Subject: [PATCH 2/4] Fix "initializer element is not a constant expression"
+ error
+
+Modern gcc triggers a error in this place:
+
+    error: initializer element is not a constant expression [-Werror=pedantic]
+
+Signed-off-by: Matwey V. Kornilov <matwey.kornilov@gmail.com>
+---
+ arch/arm/include/asm/arch-g12a/ddr_define.h | 2 +-
+ board/hardkernel/odroidc4/firmware/timing.c | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/include/asm/arch-g12a/ddr_define.h b/arch/arm/include/asm/arch-g12a/ddr_define.h
+index f13f5e18e7..b34de1c766 100644
+--- a/arch/arm/include/asm/arch-g12a/ddr_define.h
++++ b/arch/arm/include/asm/arch-g12a/ddr_define.h
+@@ -277,7 +277,7 @@
+ 											DDR_FUNC_LPDDR3_CA_TRAINING_CA1_BIT0| \
+ 											DDR_FUNC_LPDDR3_CA_TRAINING_CA1_BIT1| \
+ 											DDR_FUNC_LPDDR3_SOC_ODT_ONLY_UP	| \
+-											(1 << 31) 						\
++											(1U << 31) 						\
+ 											)
+ 
+ 
+diff --git a/board/hardkernel/odroidc4/firmware/timing.c b/board/hardkernel/odroidc4/firmware/timing.c
+index 80524e01db..78bb41d8c3 100644
+--- a/board/hardkernel/odroidc4/firmware/timing.c
++++ b/board/hardkernel/odroidc4/firmware/timing.c
+@@ -352,7 +352,7 @@ bl2_reg_t __bl2_reg[] = {
+ #endif
+ 	/* Enable VCCK */
+ 	{AO_SEC_REG0,         (1 << 0),                0xffffffff,   0, BL2_INIT_STAGE_1, 0},
+-	{AO_GPIO_O,           (1 << 31),               0xffffffff,   0, BL2_INIT_STAGE_1, 0},
++	{AO_GPIO_O,           (1U << 31),              0xffffffff,   0, BL2_INIT_STAGE_1, 0},
+ 
+ 	/* Init sys led*/
+ 	{AO_GPIO_O_EN_N,      (0 << 11),               (1 << 11),    0, BL2_INIT_STAGE_1, 0},
+-- 
+2.25.1
+

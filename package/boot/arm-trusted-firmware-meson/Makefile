@@ -44,4 +44,5 @@ endef
 define Package/arm-trusted-firmware-meson/install
 endef
 
+$(eval $(call BuildPackage,arm-trusted-firmware-meson-g12a))
 $(eval $(call BuildPackage,arm-trusted-firmware-meson-gxbb))

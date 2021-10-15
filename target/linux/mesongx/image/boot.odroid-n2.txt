@@ -1,0 +1,12 @@
+setenv bootargs "root=PARTUUID=5452574f-02 rootwait ro rootfstype=ext4,squashfs console=ttyAML0,115200 earlycon"
+
+#if test "${variant}" = "n2_plus"; then
+#	setenv fdtfile meson-g12b-odroid-n2-plus.dtb
+#else
+	echo "Found variant ${variant}"
+	setenv fdtfile meson-g12b-odroid-n2.dtb
+#fi
+ext4load mmc ${devno}:1 ${kernel_addr_r} uImage
+ext4load mmc ${devno}:1 ${fdt_addr_r} ${fdtfile}
+
+bootm ${kernel_addr_r} - ${fdt_addr_r}
