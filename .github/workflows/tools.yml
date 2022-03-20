@@ -16,9 +16,14 @@ jobs:
     strategy:
       fail-fast: False
       matrix:
-        os: 
-          - ubuntu-latest
-          - macos-latest
+        include:
+          - os: ubuntu-latest
+            image: registry.gitlab.com/openwrt/buildbot/buildworker-3.4.1
+          - os: macos-latest
+            image:
+
+    container: ${{ matrix.image }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -74,53 +79,31 @@ jobs:
             echo "/usr/local/opt/make/libexec/gnubin" >> "$GITHUB_PATH"
             echo "/usr/local/opt/make/libexec/gnubin" >> "$GITHUB_PATH"
             echo "/usr/sbin" >> "$GITHUB_PATH"
-            pwd
 
-      - name: Setup Ubuntu
+      - name: Setup BuildBot Container
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        env:
-          DEBIAN_FRONTEND: noninteractive
         run: |
-          sudo apt-get update
-          sudo apt-get -y install \
-            build-essential \
-            ccache \
-            clang-12 \
-            ecj \
-            fastjar \
-            file \
-            g++ \
-            gawk \
-            gettext \
-            git \
-            java-propose-classpath \
-            libelf-dev \
-            libncurses-dev \
-            libssl-dev \
-            mkisofs \
-            python3 \
-            python3-dev \
-            python3-distutils \
-            python3-setuptools \
-            qemu-utils \
-            rsync \
-            subversion \
-            swig \
-            unzip \
-            wget \
-            xsltproc \
-            zlib1g-dev
           echo "WORKPATH=$GITHUB_WORKSPACE/openwrt/" >> "$GITHUB_ENV"
-          cd "$WORKPATH"
-          pwd
 
       - name: Make prereq
         run: |
           cd "$WORKPATH"
-          pwd
           make defconfig
 
-      - name: Build tools
+      - name: Build tools MacOS
+        if: ${{ matrix.os == 'macos-latest' }}
+        run: |
+          cd "$WORKPATH"
+          make tools/install -j$(nproc) BUILD_LOG=1
+
+      - name: Fix permission
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: |
+          chown -R buildbot:buildbot openwrt
+
+      - name: Build tools BuildBot Container
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        shell: su buildbot -c "sh -e {0}"
         run: |
           cd "$WORKPATH"
           make tools/install -j$(nproc) BUILD_LOG=1
@@ -130,7 +113,6 @@ jobs:
         run: |
           cp -r "$WORKPATH/logs" "$GITHUB_WORKSPACE"
           cp -r "$WORKPATH/.config" "$GITHUB_WORKSPACE/config"
-
 
       - name: Upload logs
         if: always()
