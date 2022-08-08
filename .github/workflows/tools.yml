@@ -5,6 +5,10 @@ on:
     paths:
       - 'tools/**'
       - '.github/workflows/tools.yml'
+  push:
+    paths:
+      - 'tools/**'
+      - '.github/workflows/tools.yml'
 
 permissions:
   contents: read
@@ -24,11 +28,14 @@ jobs:
 
     container: ${{ matrix.image }}
 
+    permissions:
+      contents: read
+      packages: write
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0
           path: openwrt
 
       - name: Setup MacOS
@@ -38,7 +45,6 @@ jobs:
           hdiutil create -size 20g -type SPARSE -fs "Case-sensitive HFS+" -volname OpenWrt OpenWrt.sparseimage
           hdiutil attach OpenWrt.sparseimage
           mv "$GITHUB_WORKSPACE/openwrt" /Volumes/OpenWrt/
-          cd "$WORKPATH"
 
           brew install \
             autoconf \
@@ -80,21 +86,18 @@ jobs:
             echo "/usr/local/opt/make/libexec/gnubin" >> "$GITHUB_PATH"
             echo "/usr/sbin" >> "$GITHUB_PATH"
 
-      - name: Setup BuildBot Container
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: |
-          echo "WORKPATH=$GITHUB_WORKSPACE/openwrt/" >> "$GITHUB_ENV"
-
       - name: Make prereq
+        working-directory: ${{ matrix.os == 'ubuntu-latest' && 'openwrt' || env.WORKPATH }}
         run: |
-          cd "$WORKPATH"
+          touch .config
+          echo CONFIG_DEVEL=y >> .config
+          echo CONFIG_AUTOREMOVE=y >> .config
           make defconfig
 
       - name: Build tools MacOS
         if: ${{ matrix.os == 'macos-latest' }}
-        run: |
-          cd "$WORKPATH"
-          make tools/install -j$(nproc) BUILD_LOG=1
+        working-directory: ${{ env.WORKPATH }}
+        run: make tools/install -j$(nproc) BUILD_LOG=1
 
       - name: Fix permission
         if: ${{ matrix.os == 'ubuntu-latest' }}
@@ -104,26 +107,56 @@ jobs:
       - name: Build tools BuildBot Container
         if: ${{ matrix.os == 'ubuntu-latest' }}
         shell: su buildbot -c "sh -e {0}"
-        run: |
-          cd "$WORKPATH"
-          make tools/install -j$(nproc) BUILD_LOG=1
-
-      - name: Move logs to GITHUB_WORKSPACE
-        if: always()
-        run: |
-          cp -r "$WORKPATH/logs" "$GITHUB_WORKSPACE"
-          cp -r "$WORKPATH/.config" "$GITHUB_WORKSPACE/config"
+        working-directory: openwrt
+        run: make tools/install -j$(nproc) BUILD_LOG=1
 
       - name: Upload logs
         if: always()
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}-logs
-          path: "logs"
+          path: ${{ matrix.os == 'ubuntu-latest' && 'openwrt/logs' || format('{0}/logs',env.WORKPATH) }}
 
       - name: Upload config
         if: always()
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}-config
-          path: "config"
+          path: ${{ matrix.os == 'ubuntu-latest' && 'openwrt/.config' || format('{0}/.config',env.WORKPATH) }}
+
+      - name: Archive prebuilt tools
+        if: github.event_name != 'pull_request' && matrix.os == 'ubuntu-latest'
+        shell: su buildbot -c "sh -e {0}"
+        working-directory: openwrt
+        run: tar --mtime=now -cf tools.tar staging_dir/host build_dir/host dl
+
+      - name: Install docker in container
+        if: github.event_name != 'pull_request' && matrix.os == 'ubuntu-latest'
+        run: |
+          apt update
+          apt -y install lsb-release
+          mkdir -p /etc/apt/keyrings
+          curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+          echo \
+            "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
+            $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+          apt update
+          apt -y install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+      - name: Login to GitHub Container Registry
+        if: github.event_name != 'pull_request' && matrix.os == 'ubuntu-latest'
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        if: github.event_name != 'pull_request' && matrix.os == 'ubuntu-latest'
+        uses: docker/build-push-action@v3
+        with:
+          context: openwrt
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/tools:latest
+          file: openwrt/.github/workflows/Dockerfile.tools
