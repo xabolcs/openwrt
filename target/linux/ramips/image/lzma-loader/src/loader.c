@@ -194,7 +194,7 @@ static void lzma_init_data(void)
 	}
 
 	if (hdr == NULL) {
-		printf("not found!\n");
+		printf("not found! (at 0x%08x)\n", flash_base + flash_ofs);
 		halt();
 	}
 
