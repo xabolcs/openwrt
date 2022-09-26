@@ -218,6 +218,29 @@ define Device/uimage-lzma-loader
   KERNEL := kernel-bin | append-dtb | lzma | loader-kernel | uImage none
 endef
 
+define Device/uimage-okli-loader
+  LOADER_TYPE := bin
+  LOADER_FLASH_OFFS := 0x51000
+  COMPILE := loader-$(1).bin
+  COMPILE/loader-$(1).bin := loader-okli-compile
+  KERNEL := kernel-bin | append-dtb | lzma | uImage lzma -M 0x4f4b4c49
+  KERNEL_INITRAMFS := kernel-bin | append-dtb | lzma | uImage lzma
+  IMAGE/sysupgrade.bin := append-loader-okli $(1) | pad-to 16k | lzma | \
+	pad-to 4032 | append-kernel | uImage lzma | append-rootfs | \
+	pad-rootfs | append-metadata | check-size
+endef
+
+define Device/seama-okli-loader
+  $(Device/uimage-okli-loader)
+  $(Device/seama)
+  IMAGE/default := append-loader-okli $(1) | pad-to 16k | lzma | \
+	pad-to 4032 | append-kernel | pad-offset $$$$(BLOCKSIZE) 64 | append-rootfs
+  IMAGE/sysupgrade.bin := \
+	$$(IMAGE/default) | seama | pad-rootfs | check-size | append-metadata
+  IMAGE/factory.bin := \
+	$$(IMAGE/default) | pad-rootfs -x 64 | seama | seama-seal | check-size
+endef
+
 include $(SUBTARGET).mk
 
 $(eval $(call BuildImage))
