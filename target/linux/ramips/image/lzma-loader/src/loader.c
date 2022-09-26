@@ -191,10 +191,11 @@ static void lzma_init_data(void)
 			hdr = (struct image_header *) p;
 			break;
 		}
+		printf("not found! ('0x%08x' at 0x%08x)\n", magic, p);
+
 	}
 
 	if (hdr == NULL) {
-		printf("not found! (at 0x%08x)\n", flash_base + flash_ofs);
 		halt();
 	}
 
