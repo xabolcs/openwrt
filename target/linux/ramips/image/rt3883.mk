@@ -32,7 +32,7 @@ endef
 TARGET_DEVICES += belkin_f9k1109v1
 
 define Device/dlink_dir-645
-  $(Device/seama-okli-loader)
+  $(Device/seama-lzma-loader)
   SOC := rt3662
   BLOCKSIZE := 4k
   IMAGE_SIZE := 7872k
