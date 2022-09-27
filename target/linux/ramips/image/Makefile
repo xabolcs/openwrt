@@ -242,8 +242,8 @@ define Device/seama-okli-loader
 	$$(IMAGE/default) | pad-rootfs -x 64 | seama | seama-seal | check-size
   IMAGE/factory-pad32k.bin := append-loader-okli $(1) | pad-to 32k | lzma | pad-to 4032 | append-kernel | pad-offset $$$$(BLOCKSIZE) 64 | append-rootfs | pad-rootfs -x 64 | seama | seama-seal | check-size
   IMAGE/factory-pad32k-relocate.bin := append-loader-okli $(1) | pad-to 32k | relocate-kernel | lzma | pad-to 4032 | append-kernel | pad-offset $$$$(BLOCKSIZE) 64 | append-rootfs | pad-rootfs -x 64 | seama | seama-seal | check-size
-  IMAGE/factory-uimage-lzma-loader.bin := kernel-bin | append-dtb | lzma | loader-kernel | lzma -a0 | uImage lzma | pad-offset $$$$(BLOCKSIZE) 64 | append-rootfs | pad-rootfs -x 64 | seama | seama-seal | check-size
-  IMAGE/factory-uimage-lzma-loader-relocate.bin := kernel-bin | append-dtb | lzma | loader-kernel | relocate-kernel | lzma -a0 | uImage lzma | pad-offset $$$$(BLOCKSIZE) 64 | append-rootfs | pad-rootfs -x 64 | seama | seama-seal | check-size
+  IMAGE/factory-uimage-lzma-loader.bin := kernel-bin | append-dtb | lzma | loader-kernel | lzma -a0 | pad-offset $$$$(BLOCKSIZE) 64 | append-rootfs | pad-rootfs -x 64 | seama | seama-seal | check-size
+  IMAGE/factory-uimage-lzma-loader-relocate.bin := kernel-bin | append-dtb | lzma | loader-kernel | relocate-kernel | lzma -a0 | pad-offset $$$$(BLOCKSIZE) 64 | append-rootfs | pad-rootfs -x 64 | seama | seama-seal | check-size
 endef
 
 include $(SUBTARGET).mk
