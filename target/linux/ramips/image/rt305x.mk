@@ -600,7 +600,15 @@ define Device/hootoo_ht-tm02
   DEVICE_VENDOR := HooToo
   DEVICE_MODEL := HT-TM02
   DEVICE_PACKAGES := kmod-usb-ohci kmod-usb2 kmod-usb-ledtrig-usbport
-  SUPPORTED_DEVICES += ht-tm02
+  IMAGE_SIZE := 6144k
+  KERNEL_SIZE := 1536k
+  IMAGES += kernel.bin rootfs.bin
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+  IMAGE/kernel.bin := append-kernel | check-size $$$$(KERNEL_SIZE)
+  IMAGE/rootfs.bin := append-rootfs | pad-rootfs | check-size $$$$(IMAGE_SIZE)
+  DEVICE_COMPAT_VERSION := 2.0
+  DEVICE_COMPAT_MESSAGE := Partition design has changed compared to older versions (up to 19.07) due to kernel size restrictions. \
+	Upgrade via sysupgrade mechanism is not possible, so new installation via TFTP is required.
   DEFAULT := n
 endef
 TARGET_DEVICES += hootoo_ht-tm02
