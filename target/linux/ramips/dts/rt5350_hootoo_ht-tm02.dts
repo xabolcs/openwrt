@@ -45,23 +45,6 @@
 			linux,input-type = <EV_SW>;
 		};
 	};
-
-	virtual_flash {
-		compatible = "mtd-concat";
-
-		devices = <&rootfs1 &rootfs2>;
-
-		partitions {
-			compatible = "fixed-partitions";
-			#address-cells = <1>;
-			#size-cells = <1>;
-
-			partition@0 {
-				label = "rootfs";
-				reg = <0x0 0x0>;
-			};
-		};
-	};
 };
 
 &spi0 {
@@ -105,14 +88,20 @@
 				reg = <0x1d0000 0x10000>;
 			};
 
-			rootfs2: partition@1e0000 {
-				label = "rootfs2";
-				reg = <0x1e0000 0x20000>;
+			partition@1e0000 {
+				label = "userbackup";
+				reg = <0x1e0000 0x10000>;
+				read-only;
+			};
+
+			partition@1f0000 {
+				label = "user";
+				reg = <0x1f0000 0x10000>;
 				read-only;
 			};
 
 			rootfs1: partition@200000 {
-				label = "rootfs1";
+				label = "rootfs";
 				reg = <0x200000 0x600000>;
 			};
 		};
