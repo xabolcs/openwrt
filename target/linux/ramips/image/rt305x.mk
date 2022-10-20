@@ -594,11 +594,9 @@ define Device/hilink_hlk-rm04
 endef
 TARGET_DEVICES += hilink_hlk-rm04
 
-define Device/hootoo_ht-tm02
+define Device/sunvalley_tripmate_common
   SOC := rt5350
   IMAGE_SIZE := 7872k
-  DEVICE_VENDOR := HooToo
-  DEVICE_MODEL := HT-TM02
   DEVICE_PACKAGES := kmod-usb-ohci kmod-usb2 kmod-usb-ledtrig-usbport
   IMAGE_SIZE := 6144k
   KERNEL_SIZE := 1536k
@@ -610,6 +608,20 @@ define Device/hootoo_ht-tm02
   DEVICE_COMPAT_MESSAGE := Partition design has changed compared to older versions (up to 19.07) due to kernel size restrictions. \
 	Upgrade via sysupgrade mechanism is not possible, so new installation via TFTP is required.
   DEFAULT := n
+endef
+
+define Device/hootoo_ht-tm01
+  $(Device/sunvalley_tripmate_common)
+  DEVICE_VENDOR := HooToo
+  DEVICE_MODEL := HT-TM01
+  DEVICE_PACKAGES += kmod-i2c-ralink
+endef
+TARGET_DEVICES += hootoo_ht-tm01
+
+define Device/hootoo_ht-tm02
+  $(Device/sunvalley_tripmate_common)
+  DEVICE_VENDOR := HooToo
+  DEVICE_MODEL := HT-TM02
 endef
 TARGET_DEVICES += hootoo_ht-tm02
 

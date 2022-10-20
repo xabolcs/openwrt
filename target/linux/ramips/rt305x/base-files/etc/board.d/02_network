@@ -22,6 +22,7 @@ ramips_setup_interfaces()
 	hame,mpr-a1|\
 	hame,mpr-a2|\
 	hauppauge,broadway|\
+	hootoo,ht-tm01|\
 	hootoo,ht-tm02|\
 	huawei,d105|\
 	intenso,memory2move|\

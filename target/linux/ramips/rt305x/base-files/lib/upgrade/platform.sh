@@ -7,6 +7,7 @@ REQUIRE_IMAGE_METADATA=1
 
 platform_check_image() {
 	case "$(board_name)" in
+	*ht-tm01|\
 	*ht-tm02)
 		local config_size=$(mtd_get_part_size config)
 
@@ -47,6 +48,7 @@ platform_do_upgrade() {
 	local board=$(board_name)
 
 	case "$board" in
+	hootoo,ht-tm01|\
 	hootoo,ht-tm02)
 		hootoo_do_upgrade "$1"
 		;;

@@ -72,6 +72,10 @@ planex,mzk-w300nh2)
 hauppauge,broadway)
 	ucidef_set_led_netdev "wifi_led" "wifi" "red:wps_active" "wlan0"
 	;;
+hootoo,ht-tm01)
+	ucidef_set_led_netdev "eth" "Ethernet" "blue:lan" "eth0"
+	ucidef_set_led_netdev "wifi_led" "wifi" "green:wlan" "wlan0"
+	;;
 hootoo,ht-tm02)
 	ucidef_set_led_netdev "eth" "Ethernet" "green:lan" "eth0"
 	ucidef_set_led_netdev "wifi_led" "wifi" "blue:wlan" "wlan0"
