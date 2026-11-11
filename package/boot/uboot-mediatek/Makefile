@@ -178,6 +178,17 @@ define U-Boot/mt7622_ubnt_unifi-6-lr-v3
   FIP_COMPRESS:=1
 endef
 
+define U-Boot/mt7622_xiaomi_redmi-router-ax6s
+  NAME:=Xiaomi Redmi Router AX6S (as mtk_uartboot recovery)
+  UBOOT_CONFIG:=mt7622_xiaomi_redmi-router-ax6s-ubi-loader
+  BUILD_DEVICES:=xiaomi_redmi-router-ax6s
+  BUILD_SUBTARGET:=mt7622
+  UBOOT_IMAGE:=u-boot.fip
+  BL2_BOOTDEV:=snand-ubi
+  BL2_DDRBLOB:=1
+  DEPENDS:=+trusted-firmware-a-mt7622-snand-ubi-1ddr
+endef
+
 define U-Boot/mt7622_xiaomi_redmi-router-ax6s-ubi-loader
   NAME:=Xiaomi Redmi Router AX6S (as UBI loader)
   UBOOT_CONFIG:=mt7622_xiaomi_redmi-router-ax6s-ubi-loader
@@ -1522,6 +1533,7 @@ UBOOT_TARGETS := \
 	mt7622_ubnt_unifi-6-lr-v1 \
 	mt7622_ubnt_unifi-6-lr-v2 \
 	mt7622_ubnt_unifi-6-lr-v3 \
+	mt7622_xiaomi_redmi-router-ax6s \
 	mt7622_xiaomi_redmi-router-ax6s-ubi-loader \
 	mt7623n_bpir2 \
 	mt7623a_unielec_u7623 \

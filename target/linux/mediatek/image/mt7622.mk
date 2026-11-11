@@ -498,7 +498,9 @@ define Device/xiaomi_redmi-router-ax6s
   KERNEL_INITRAMFS_SUFFIX := -recovery.itb
   IMAGES := sysupgrade.itb
   IMAGE/sysupgrade.itb := append-kernel | fit gzip $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb external-static-with-rootfs | append-metadata
-  ARTIFACTS := ubi-loader.itb
+  ARTIFACTS := ubi-loader.itb preloader.bin bl31-uboot.fip
+  ARTIFACT/preloader.bin := bl2 snand-ubi-1ddr
+  ARTIFACT/bl31-uboot.fip := bl31-uboot xiaomi_redmi-router-ax6s
   ARTIFACT/ubi-loader.itb := uboot-bin xiaomi_redmi-router-ax6s-ubi-loader | lzma | uboot-fit lzma
 ifneq ($(CONFIG_TARGET_ROOTFS_SQUASHFS),)
   ARTIFACTS += factory.bin
